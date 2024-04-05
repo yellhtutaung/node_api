@@ -5,9 +5,7 @@ const {checkApiKey} = require('../middleware/authMiddleware');
 // controller
 const {login, register} = require('../controllers/authController');
 
-router.post('/login',checkApiKey,function(req,res){
-    return res.json({data:req.body.username});
-});
+router.post('/login',checkApiKey,login);
 
 router.post('/register',checkApiKey,register);
 

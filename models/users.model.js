@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: 'Password must be at least 6 characters',
         minLength:6,
-        maxLength:20
+        // maxLength:40
     },
     date_of_birth:{
         type: String,
