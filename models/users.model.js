@@ -1,9 +1,11 @@
 const mongoose = require('mongoose');
 const generateRandomStr = require('../controllers/helpers/helper');
+const jwt = require('jsonwebtoken');
+
 const userSchema = new mongoose.Schema({
     id:{
         type: Number,
-        required: "Id fiels is required"
+        required: "Id fields is required",
     },
     name:{
         type: String,
@@ -14,25 +16,24 @@ const userSchema = new mongoose.Schema({
     username:{
         type: String,
         default: null,
-        unique: true,
+        // unique: true, // Allow null and ensure uniqueness
     },
     email:{
         type: String,
         required: 'Email is required',
-        unique: true,
-        maxLength: 30
+        maxLength: 30,
+        // sparse: true, // Allow null and ensure uniqueness
     },
     phone:{
         type: String,
         default: null,
-        unique: true,
         maxLength: 15
+        // sparse: true,
     },
     password:{
         type: String,
         required: 'Password must be at least 6 characters',
         minLength:6,
-        // maxLength:40
     },
     date_of_birth:{
         type: String,
@@ -40,7 +41,8 @@ const userSchema = new mongoose.Schema({
     },
     gender:{
         type: String,
-        default: 'Male'
+        enumerable: ['Male', 'Female'],
+        default: 'Male',
     },
     profile:{
         type: String,
@@ -62,13 +64,27 @@ const userSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    token:{
+    refreshToken:{
         type: String,
-        required: 'Token is required',
     }
 },
     { timestamps: true }
 );
+
+userSchema.methods.generateAccessToken = function ()
+{
+    return jwt.sign({
+        _id: this._id,
+        name: this.name
+    },process.env.JWT_ACCESS_SECRET,{expiresIn: process.env.JWT_ACCESS_EXPIRY})
+}
+
+userSchema.methods.generateRefreshToken = function ()
+{
+    return jwt.sign({
+        _id: this._id,
+    },process.env.JWT_REFRESH_SECRET,{expiresIn: process.env.JWT_REFRESH_EXPIRY})
+}
 
 const userCollection = mongoose.model('users',userSchema);
 

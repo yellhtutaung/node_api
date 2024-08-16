@@ -3,7 +3,8 @@ const dotenv = require('dotenv');
 //load config
 dotenv.config({path:'../config/.env'});
 const {registerValidator} = require('../controllers/validate/authValidator');
-
+const userCollection = require('../models/users.model')
+const jwt = require('jsonwebtoken')
 
 const checkApiKey = (req,res,next) =>
 {
@@ -31,4 +32,25 @@ const registerMiddleware = (req,res,next) =>
     }
 }
 
-module.exports = {checkApiKey, registerMiddleware}
+const verifyJWT = async (req, res, next) =>
+{
+    try {
+        const token = req.cookies?.accessToken || req.header('Authorization')?.replace('Bearer ',' ')
+        if (!token)
+        {
+            res.status(401).json(responseError(401,'Unauthorized request'))
+        }
+        const decodedData = jwt.verify(token,process.env.JWT_ACCESS_SECRET)
+        const user = await userCollection.findById(decodedData?._id).select(`-password -refreshToken`)
+        if (!user)
+        {
+            res.status(404).json(responseError(404,'Invalid access token | user not found '))
+        }
+        req.user = user // keynote adding user data to request | for logout purpose
+        next()
+    }catch(error){
+        res.status(401).json(responseError(401,`${error?.message || 'Invalid access token | user not found '}`))
+    }
+}
+
+module.exports = {checkApiKey, registerMiddleware, verifyJWT}

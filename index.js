@@ -6,13 +6,15 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 
 // mongoose db connection
 require('./database/mongooseDb');
 
 //body-parser config;
-app.use(bodyParser.urlencoded({extended: true })); // These code must me upper of the controllers include
+app.use(bodyParser.urlencoded({extended: true })); // These code must be upper of the controllers include
 app.use(bodyParser.json()); // These code must be upper of the controllers include
+app.use(cookieParser())
 
 // route group
 const authRoutes = require('./routes/auth');
